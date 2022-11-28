@@ -1,0 +1,236 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Training &#8212; aizynthfinder 3.6.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="aizynthfinder package" href="aizynthfinder.html" />
+    <link rel="prev" title="How-to" href="howto.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aizynthfinder</a></h1>
+
+
+
+<p class="blurb">A fast, robust and flexible software for retrosynthetic planning</p>
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gui.html">Graphical user interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_interface.html">Python interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stocks.html">Stocks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoring.html">Scoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">How-to</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Training</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#training-configuration">Training configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pre-processing-and-training">Pre-processing and training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#filter-policy">Filter policy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#training-recommender-model">Training recommender model</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="aizynthfinder.html">aizynthfinder package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequences.html">Sequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relationships.html">Relationships</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="howto.html" title="previous chapter">How-to</a></li>
+      <li>Next: <a href="aizynthfinder.html" title="next chapter">aizynthfinder package</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="training">
+<h1>Training<a class="headerlink" href="#training" title="Permalink to this headline">¶</a></h1>
+<p><strong>——————————————————————————————————————————————</strong></p>
+<p><strong>The use of this functionality is now discouraged and the users should have a look at the AiZynthTrain package for training their models</strong></p>
+<p><strong>——————————————————————————————————————————————</strong></p>
+<p>This page explains the training tools available in the <cite>aizynthfinder</cite> package.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<p>To start with, one needs a CSV file with templates, i.e. a pre-computed template
+library. Tools to create such a library is not included in the <cite>aizynthfinder</cite> package,
+because it is a tool that has a wider applicability than the tools provided in this package.
+There are for instance tools like RdChiral (<a class="reference external" href="https://pubs.acs.org/doi/abs/10.1021/acs.jcim.9b00286">https://pubs.acs.org/doi/abs/10.1021/acs.jcim.9b00286</a>).</p>
+<p>The CSV file should contain the following columns in the given order:</p>
+<ul class="simple">
+<li><p>index - row index, this is ignored</p></li>
+<li><p>ID - an ID, this is ignored</p></li>
+<li><p>reaction_hash - a unique hash for each unique reaction. Are used to drop duplicates in the data.</p></li>
+<li><p>reactants - the SMILES of the reactants</p></li>
+<li><p>products - the SMILES of the products</p></li>
+<li><p>classification - reaction classification, this is used to add metadata to the tree search</p></li>
+<li><p>retro_template - the reaction template for the retro reaction</p></li>
+<li><p>template_hash - a unique hash for each unique template. Will be used to filter uncommon templates.</p></li>
+<li><p>selectivity - an indicator for selectivity, this is ignored</p></li>
+<li><p>outcomes - number of reaction outcomes, this is ignored</p></li>
+</ul>
+<p>If you do not have all of these columns, or they are in another order, it is possible to
+modify the <code class="docutils literal notranslate"><span class="pre">library_headers</span></code> setting in the configuration file (see below). However, the
+<code class="docutils literal notranslate"><span class="pre">reaction_hash</span></code>, <code class="docutils literal notranslate"><span class="pre">reactants</span></code>, <code class="docutils literal notranslate"><span class="pre">products</span></code>, <code class="docutils literal notranslate"><span class="pre">retro_template</span></code> and <code class="docutils literal notranslate"><span class="pre">template_hash</span></code>
+columns are mandatory.</p>
+<p>If you change this setting, you might also consider changing the <code class="docutils literal notranslate"><span class="pre">metadata_headers</span></code> that
+is a list of columns that is taken from the template library and injected into the tree search.
+The default columns are “template_hash” and “classification”, so if you for instance don’t have
+the <code class="docutils literal notranslate"><span class="pre">classification</span></code> column in your set, you need to update the <code class="docutils literal notranslate"><span class="pre">metadata_headers</span></code>.</p>
+</section>
+<section id="training-configuration">
+<h2>Training configuration<a class="headerlink" href="#training-configuration" title="Permalink to this headline">¶</a></h2>
+<p>The training is customizable to some extent by a configuration file in YAML format. If not provided,
+the settings have default values. There are only a few settings that are of real interest to modify.
+They are shown in this snippet:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">output_path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;.&quot;</span><span class="w"></span>
+<span class="nt">file_prefix</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;full_uspto&quot;</span><span class="w"></span>
+<span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">256</span><span class="w"></span>
+<span class="nt">epochs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w"></span>
+</pre></div>
+</div>
+<p>These settings control the output directory, the prefix to all files,
+the batch size for training and the number of training epochs.</p>
+<p>For the other settings see the file <code class="docutils literal notranslate"><span class="pre">default_training.yml</span></code> in the <code class="docutils literal notranslate"><span class="pre">data</span></code> folder of the package.</p>
+<p><cite>Note!</cite> The filename of the raw template library (discussed above) also needs to start with <code class="docutils literal notranslate"><span class="pre">file_prefix</span></code> and
+end of with <code class="docutils literal notranslate"><span class="pre">_raw_template_library.csv</span></code>.</p>
+</section>
+<section id="pre-processing-and-training">
+<h2>Pre-processing and training<a class="headerlink" href="#pre-processing-and-training" title="Permalink to this headline">¶</a></h2>
+<p>First the template library needs to be pre-processed such that</p>
+<ul class="simple">
+<li><p>The original library is pruned from templates that occur only a few times</p></li>
+<li><p>The template hash is turned into a label vector, i.e. the the target of the fitting</p></li>
+<li><p>The products SMILES are turned into fingerprint vectors, i.e. the input for the fitting</p></li>
+<li><p>The input and label matrices are split into training, testing and validation sets</p></li>
+</ul>
+<p>This can be accomplished with</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">preprocess_expansion</span> <span class="n">config</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> is your local configuration file for the training (see above).</p>
+<p>Note that this procedure will take some time and might require a lot of memory.</p>
+<p>Once this is done, you can train the network using</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">aizynth_training</span> <span class="n">config</span><span class="o">.</span><span class="n">yaml</span> <span class="n">expansion</span>
+</pre></div>
+</div>
+<p>Note that this might take a long time to converge.</p>
+<p>The folder <code class="docutils literal notranslate"><span class="pre">checkpoint</span></code> will contain the Keras model that you can use as input
+to the tree search algorithm.</p>
+<p>The pre-processing script created a file that ends with <code class="docutils literal notranslate"><span class="pre">unique_templates.hdf5</span></code> -
+this contains the unique templates and is the second input that you need for the tree search algorithm</p>
+</section>
+<section id="filter-policy">
+<h2>Filter policy<a class="headerlink" href="#filter-policy" title="Permalink to this headline">¶</a></h2>
+<p>To train a filter policy an array of tools are available.</p>
+<p>First, you need to generate negative data, i.e. reactions that are unfeasible.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make_false_products</span> <span class="n">config</span><span class="o">.</span><span class="n">yml</span> <span class="n">strict</span>
+<span class="n">make_false_products</span> <span class="n">config</span><span class="o">.</span><span class="n">yml</span> <span class="n">random</span>
+<span class="n">make_false_products</span> <span class="n">config</span><span class="o">.</span><span class="n">yml</span> <span class="n">recommender</span>
+</pre></div>
+</div>
+<p>The first argument is a configuration file, similar to the one used above with the <code class="docutils literal notranslate"><span class="pre">preprocess_expansion</span></code> tool.
+The second argument should be “strict”, “random” or “recommender” depending on what method you want to use.</p>
+<p>When using the “recommender” method it is important to add the following to the configuration file:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">recommender_model</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;some_path/checkpoints/keras_model.hdf&quot;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>which points to the trained “recommender” model (see below).</p>
+<p>The second step is pre-processing the training data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">preprocess_filter</span><span class="o">.</span><span class="n">py</span> <span class="n">config</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+<p>And the third and final step is the actual training:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">aizynth_training</span> <span class="n">config</span><span class="o">.</span><span class="n">yaml</span> <span class="nb">filter</span>
+</pre></div>
+</div>
+<p>The folder <code class="docutils literal notranslate"><span class="pre">checkpoint</span></code> will contain the Keras model that you can use as input
+to the tree search algorithm.</p>
+</section>
+<section id="training-recommender-model">
+<h2>Training recommender model<a class="headerlink" href="#training-recommender-model" title="Permalink to this headline">¶</a></h2>
+<p>Training to recommender model is very similar to training the expansion policy</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">preprocess_recommender</span> <span class="n">config</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">aizynth_training</span> <span class="n">config</span><span class="o">.</span><span class="n">yaml</span> <span class="n">recommender</span>
+</pre></div>
+</div>
+<p>The folder <code class="docutils literal notranslate"><span class="pre">checkpoint</span></code> will contain the Keras model that you can use to generate negative data.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2020-2022, Molecular AI group.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/training.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
